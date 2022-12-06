@@ -45,18 +45,63 @@ Both `Create` and `Create2` can create a new contract.
    4. Push to the stack.
       - `address`: the address of the deployed contract. if the deployment failed, will throw error.
 
+4. Calculate Gas cost
+   1. For `Create`
+   ```
+   gas_cost = 32000 + memory_expansion_cost + code_deposit_cost
+   ```
+   
+   2. For `Create2`
+   ```
+   gas_cost = 32000 + 6 * data_size_words + memory_expansion_cost + code_deposit_cost
+   ```
+   
+   * Tips
+     
+     - `data_size_words`:
+     ```
+     data_size_words = (data_size + 31) / 32
+     ```
+
+     - `code_deposit_cost`:
+     ```
+     code_deposit_cost = 200 * deployed_code_size
+     ```
+     
+     - `memory_expansion_cost`:
+
+     ```
+     memory_size_word = (memory_byte_size + 31) / 32
+     memory_cost = (memory_size_word ** 2) / 512 + (3 * memory_size_word)
+     
+     memory_expansion_cost = new_memory_cost - last_memory_cost
+     ```
 
 ## Constraints
 
-1. opId == 0xF0
-2. State transition:
-    - gc + 2
-    - stack_pointer - 1
-    - pc + 1
-    - gas + 2
-3. Lookups: 2
-    - ReturnDataLength is in the rw table {call context, call ID, ReturnDataLength}.
-    - ReturnDataLength is on top of stack.
+1. opcodeId checks
+   - opId === OpcodeId(0xF0) for `Create`
+   - opId === OpcodeId(0xF5) for `Create2`
+2. Calculate the `contract_addr`
+   - For `Create`
+   ```
+    address == keccak256(rlp([sender_address,sender_nonce]))
+    ```
+   - For `Create2`
+   ```
+   address == keccak256(0xff + sender_address + salt + keccak256(initialisation_code))[12:]
+   ```
+2. State Transitions:
+   - rw_counter + 4 for `Create`, rw_counter + 5 for `Create2`,
+   - stack_pointer + 3
+   - pc + 1
+   - gas + gas_cost
+   
+3. Lookups:
+   - `value` is at the top of the stack
+   - `offset` is at the second position of the stack
+   - `size` is at the third position of the stack
+   - `salt` is at the forth position of the stack
 
 ## Exceptions
 
@@ -66,4 +111,4 @@ Both `Create` and `Create2` can create a new contract.
 
 ## Code
 
-Please refer to `src/zkevm_specs/evm/execution/callop.py`.
+Please refer to `src/zkevm_specs/evm/execution/create.py`.
