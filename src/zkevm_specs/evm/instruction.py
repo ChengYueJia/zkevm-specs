@@ -994,6 +994,9 @@ class Instruction:
         linear_cost = memory_size.expr() * MEMORY_EXPANSION_LINEAR_COEFF
         return quadratic_cost + linear_cost
 
+    def code_deposit_cost(self, deployed_code_size: Expression) -> FQ:
+        return FQ(200) * deployed_code_size
+
     def memory_expansion_constant_length(
         self, offset: Expression, length: Expression
     ) -> Tuple[FQ, FQ]:

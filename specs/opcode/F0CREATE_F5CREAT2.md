@@ -102,6 +102,7 @@ Both `Create` and `Create2` can create a new contract.
    - `offset` is at the second position of the stack
    - `size` is at the third position of the stack
    - `salt` is at the forth position of the stack
+   - `address` the result, is at the new top of the stack
 
 ## Exceptions
 

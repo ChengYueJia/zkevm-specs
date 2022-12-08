@@ -244,6 +244,7 @@ class CallContextFieldTag(IntEnum):
     IsStatic = auto()  # to know if state modification is within static call or not
     IsRoot = auto()
     IsCreate = auto()
+    IsCreate2 = auto()
     CodeHash = auto()
 
     # The following are read-only data inside a call like previous section for
